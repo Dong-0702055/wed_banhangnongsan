@@ -1,11 +1,12 @@
 # LIFEGIFT
 
-LIFEGIFT là ứng dụng thương mại điện tử gồm giao diện React cho khách hàng và quản trị viên, REST API Spring Boot và cơ sở dữ liệu MySQL.
+LIFEGIFT là ứng dụng thương mại điện tử gồm giao diện React cho khách hàng và quản trị viên, REST API Spring Boot, cơ sở dữ liệu MySQL và AI service FastAPI để nhận diện intent/entity.
 
 ## Cấu trúc dự án
 
 - `lifegift-frontend/` - React 19 và Vite; Docker dùng Nginx để phục vụ giao diện.
 - `lifegift-backend/` - REST API Spring Boot 4.1, Java 17, Maven.
+- `AI/` - FastAPI phục vụ PhoBERT intent/entity qua cổng `5000`.
 - `lifegift.sql` - Schema và dữ liệu mẫu MySQL. Docker chỉ import file này khi tạo database volume lần đầu.
 
 ## Chạy bằng Docker Compose
@@ -18,14 +19,15 @@ Yêu cầu: Docker Desktop hoặc Docker Engine có Compose plugin.
    Copy-Item .env.example .env
    ```
 
-2. Sửa `.env`: đặt mật khẩu database riêng và thay `JWT_SECRET` bằng chuỗi ngẫu nhiên dài ít nhất 32 ký tự. Có thể tạo chuỗi bằng `openssl rand -hex 32`.
-3. Từ thư mục gốc dự án, chạy:
+2. Đảm bảo model intent đã huấn luyện có tại `AI/model/intent_classifier/best_model/`. Model không được commit vào Git vì kích thước lớn; nếu lưu model ở nơi khác, đặt `AI_MODEL_DIR` trong `.env` thành đường dẫn tới thư mục `model`.
+3. Sửa `.env`: đặt mật khẩu database riêng và thay `JWT_SECRET` bằng chuỗi ngẫu nhiên dài ít nhất 32 ký tự. Có thể tạo chuỗi bằng `openssl rand -hex 32`.
+4. Từ thư mục gốc dự án, chạy:
 
    ```powershell
    docker compose up --build
    ```
 
-4. Mở trang web tại <http://localhost:8080>. Frontend chuyển tiếp request `/api` tới Spring Boot. API cũng có thể truy cập trực tiếp tại <http://localhost:8081>.
+5. Mở trang web tại <http://localhost:8080>. Frontend chuyển tiếp request `/api` tới Spring Boot. API cũng có thể truy cập trực tiếp tại <http://localhost:8081>; AI service có tài liệu API tại <http://localhost:5000/docs>.
 
 Dừng bằng `Ctrl+C` hoặc `docker compose down`. Database nằm trong named volume `lifegift-db-data` và được giữ lại qua các lần khởi động. SQL chỉ chạy khi volume được khởi tạo lần đầu, không ghi đè database đã tồn tại.
 
@@ -86,6 +88,7 @@ npm run build
 | --- | ---: | ---: | --- |
 | `frontend` | `FRONTEND_PORT` (mặc định `8080`) | `8080` | React qua Nginx và proxy `/api` |
 | `backend` | `BACKEND_PORT` (mặc định `8081`) | `8080` | Spring Boot API |
+| `ai` | `AI_PORT` (mặc định `5000`) | `5000` | FastAPI PhoBERT intent/entity |
 | `db` | `MYSQL_PORT` (mặc định `3307`) | `3306` | MySQL 8 |
 
 Nếu cổng mặc định đã được sử dụng, thay các biến cổng tương ứng trong `.env`.

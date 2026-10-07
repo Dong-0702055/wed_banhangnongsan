@@ -41,6 +41,22 @@ services:
       retries: 10
       start_period: 45s
 
+  ai:
+    build:
+      context: ./AI
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    volumes:
+      - ${AI_MODEL_DIR:-./AI/model}:/app/model:ro
+    ports:
+      - "${AI_PORT:-5000}:5000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/openapi.json', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 90s
+
   frontend:
     build:
       context: ./lifegift-frontend
